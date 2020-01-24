@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body style="background-color: black">
+    <div>Enter you nickname</div>
+    <input type="text" name="username" id="username">
+    <input type="submit" value="submit" id="send">
+
+    <canvas style="border:1px solid grey; background-color:darkgrey" id="canvas" width="1200" height="900"></canvas>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/handlers/2DMovementHandler.js"></script>
+</body>
+</html>
+
+<script>
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext('2d');
+    let connected = false;
+    let socket = io.connect("ws://localhost:8080");
+    let c_width = canvas.width;
+    let c_height = canvas.height;
+
+    ctx.fillStyle = 'green';
+    ctx.beginPath();
+    ctx.font = '10px serif';
+    ctx.arc(100, 100, 10, 0, 2 * Math.PI);
+    ctx.fill();
+    //var pseudo = prompt("What is your nickname?")
+
+    $("#send").click(()=>{
+        let nickname = $("#username").val()
+        socket.emit("new-user",nickname)
+        connected = true;
+    })
+
+
+    socket.on("message",(message)=>{
+        alert("You are logged in "+ message)
+    })
+
+    socket.on("updatePlayers",(players)=>{
+        ctx.clearRect(0, 0, c_width, c_height)
+        for(var id in players){
+            var player = players[id]
+            ctx.fillStyle = 'green';
+            console.log(player.nickname + "| x:"+player.x+" y:"+player.y)
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, 10, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.fillText(player.nickname, player.x-15, player.y-10);
+            
+        }
+    })
+
+    setInterval(()=>{
+        if(connected)
+            socket.emit("move",movement)
+      },1000/60)
+
+
+
+</script>

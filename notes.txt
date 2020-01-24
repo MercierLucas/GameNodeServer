@@ -1,0 +1,3 @@
+JS SERVER (Node.js):
+	- Dépendances:
+		+ socket.io : connexion synchrone via websockets
